@@ -37,7 +37,7 @@ def play():
     global game
 
     if request.method == "POST":
-        # Spieler, der schießen soll, wird aus dem Formular geholt
+        # Spieler, der schießen soll
         current_player = request.form.get("current_player")
 
         if current_player not in game.players:
@@ -46,12 +46,29 @@ def play():
         # Spieler schießt
         result = game.play_round(current_player)
 
-        # Spiel ist vorbei, wenn nur noch ein Spieler übrig ist
+        # Spiel ist vorbei
         if game.is_game_over():
             winner = game.get_winner()
-            return render_template("play.html", game=game, winner=winner)
+            revolvers_status = {
+                player: 6 - game.revolvers[player].current_position
+                for player in game.players
+            }
+            return render_template("play.html", game=game, winner=winner, revolvers=revolvers_status, result=result)
 
-    return render_template("play.html", game=game)
+        # Status der Revolver
+        revolvers_status = {
+            player: 6 - game.revolvers[player].current_position
+            for player in game.players
+        }
+
+        return render_template("play.html", game=game, revolvers=revolvers_status, result=result)
+
+    # Initial GET-Anfrage
+    revolvers_status = {
+        player: 6 - game.revolvers[player].current_position
+        for player in game.players
+    }
+    return render_template("play.html", game=game, revolvers=revolvers_status)
 
 
 @app.route("/restart", methods=["POST"])
@@ -62,17 +79,18 @@ def restart():
     global game
 
     # Prüfen, ob neue Spielernamen eingegeben wurden
-    new_players = request.form.get("players")
+    new_players = request.form.get("players")  # Eingabe aus dem Textfeld
     if new_players:
-        players = new_players.splitlines()
+        players = new_players.splitlines()  # Neue Spielernamen verarbeiten
         if len(players) < 2:
-            return redirect(url_for("index"))
-
-        # Neues Spiel mit neuen Spielernamen starten
+            # Fehler, wenn weniger als 2 Spieler eingegeben wurden
+            return render_template("play.html", game=game, error="Es müssen mindestens 2 Spieler angegeben werden.")
+        # Neues Spiel mit neuen Spielern
         game = Game(players)
-        game.setup_game(players)
     else:
-        # Neues Spiel mit den gleichen Spielern starten
-        game.setup_game(game.players)
+        # Neues Spiel mit ursprünglichen Spielern
+        game.reset_to_original_players()
 
     return redirect(url_for("play"))
+
+

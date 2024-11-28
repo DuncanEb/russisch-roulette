@@ -7,8 +7,44 @@
 </head>
 <body>
     <h1>Spielstatus</h1>
-    <p>Verbleibende Spieler: {{ game.players }}</p>
 
+    <!-- Verbleibende Spieler -->
+    <p><strong>Verbleibende Spieler:</strong> {{ game.players }}</p>
+
+    <!-- Rückmeldung zum Schuss -->
+    {% if result %}
+        {% if result.lost %}
+            <p style="color: red;">💥 BOOM! {{ result.player }} hat verloren!</p>
+        {% else %}
+            <p style="color: green;">🌟 Klick! {{ result.player }} hat überlebt!</p>
+        {% endif %}
+    {% endif %}
+
+    <!-- Revolverstatus -->
+    <h2>🔫 Revolverstatus</h2>
+    <ul>
+        {% for player, revolver in revolvers.items() %}
+            <li>{{ player }}: {{ revolver }} Schuss verbleibend</li>
+        {% endfor %}
+    </ul>
+
+    <!-- Auswahl des nächsten Spielers -->
+    {% if not winner %}
+        <form method="post">
+            <label for="current_player">Wer soll schießen?</label>
+            <select name="current_player">
+                {% for player in game.players %}
+                    <option value="{{ player }}">{{ player }}</option>
+                {% endfor %}
+            </select>
+            <button type="submit">Schießen</button>
+        </form>
+        {% if error %}
+            <p style="color: red;">{{ error }}</p>
+        {% endif %}
+    {% endif %}
+
+    <!-- Spielende -->
     {% if winner %}
         <h2>🏆 {{ winner }} ist der Gewinner! 🎉</h2>
         <form action="/restart" method="post">
@@ -16,19 +52,6 @@
             <textarea id="players" name="players" rows="5" cols="30" placeholder="Spielername pro Zeile"></textarea><br>
             <button type="submit">Neues Spiel starten</button>
         </form>
-    {% else %}
-        <form method="post">
-            <label for="current_player">Wer soll schießen?</label>
-            <select name="current_player">
-                {% for player in game.players %}
-                <option value="{{ player }}">{{ player }}</option>
-                {% endfor %}
-            </select>
-            <button type="submit">Schießen</button>
-        </form>
-        {% if error %}
-        <p style="color: red;">{{ error }}</p>
-        {% endif %}
     {% endif %}
 </body>
 </html>

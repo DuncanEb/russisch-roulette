@@ -17,16 +17,22 @@ def index():
     if request.method == "POST":
         # Spielernamen aus dem Formular holen
         players = request.form.get("players").splitlines()
+
+        # Validierung
         if len(players) < 2:
             return render_template("index.html", error="Es müssen mindestens 2 Spieler angegeben werden.")
+        if any(not player.strip() for player in players):  # Leere Namen verhindern
+            return render_template("index.html", error="Spielernamen dürfen nicht leer sein.")
+        if len(players) != len(set(player.strip() for player in players)):  # Doppelte Namen verhindern
+            return render_template("index.html", error="Spielernamen müssen eindeutig sein.")
 
         # Neues Spiel initialisieren
         game = Game(players)
         game.setup_game(players)
-
         return redirect(url_for("play"))
 
     return render_template("index.html")
+
 
 
 @app.route("/play", methods=["GET", "POST"])

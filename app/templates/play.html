@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Russisches Roulette</title>
+    <title>Spielstatus</title>
+    <link rel="stylesheet" href="/static/css/styles.css">
 </head>
 <body>
     <h1>Spielstatus</h1>
@@ -14,7 +15,7 @@
     <!-- Rückmeldung zum Schuss -->
     {% if result %}
         {% if result.lost %}
-            <p style="color: red;">💥 BOOM! {{ result.player }} hat verloren!</p>
+            <p class="error">💥 BOOM! {{ result.player }} hat verloren!</p>
         {% else %}
             <p style="color: green;">🌟 Klick! {{ result.player }} hat überlebt!</p>
         {% endif %}
@@ -39,17 +40,11 @@
             </select>
             <button type="submit">Schießen</button>
         </form>
-        {% if error %}
-            <p style="color: red;">{{ error }}</p>
-        {% endif %}
-    {% endif %}
-
-    <!-- Spielende -->
-    {% if winner %}
+    {% else %}
         <h2>🏆 {{ winner }} ist der Gewinner! 🎉</h2>
         <form action="/restart" method="post">
             <label for="players">Neue Spielernamen (optional):</label><br>
-            <textarea id="players" name="players" rows="5" cols="30" placeholder="Spielername pro Zeile"></textarea><br>
+            <textarea id="players" name="players" placeholder="Spielername pro Zeile"></textarea><br>
             <button type="submit">Neues Spiel starten</button>
         </form>
     {% endif %}

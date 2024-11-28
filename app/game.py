@@ -1,55 +1,65 @@
+from app.utils import player_shoot_logic, check_exit, print_revolvers_status, get_players, remove_player
 from app.revolver import Revolver
-from app.utils import check_exit, get_players, print_revolvers_status
 import time
 
 class RussianRoulette:
-    def __init__(self):
-        self.players = []
+    def __init__(self, players):
+        """
+        Initialisiert das Spiel mit einer Liste von Spielern.
+        :param players: Liste der Spielernamen
+        """
+        self.players = players
+        self.revolvers = {player: Revolver() for player in players}  # Revolver für jeden Spieler
 
-    def start_game(self):
-        """Startet das Spiel."""
-        print("🎲 Willkommen zum Russischen Roulette! 🎲")
 
-        # Spieler einlesen mit ausgelagerter Funktion
-        self.players = get_players()
+    def setup_game(self, players=None):
+        """
+        Rüstet das Spiel mit einer Liste von Spielern aus.
+        :param players: Liste der Spielernamen (optional).
+        """
+        if players is None:
+            players = get_players()  # Spieler eingeben, falls nicht übergeben
+        self.players = players
+        self.revolvers = {player: Revolver() for player in players}
 
-        print(f"\n✅ {len(self.players)} Spieler treten an: {', '.join(self.players)}")
-        print("=" * 50)
+    def play_round(self):
+        """
+        Spielt eine Runde ab. Wählt den Spieler, führt den Schuss aus und zeigt Status an.
+        """
+        print(f"\n👥 Verbleibende Spieler: {', '.join(self.players)}")
 
-        # Initialisiere Revolver für jeden Spieler
-        revolvers = {player: Revolver() for player in self.players}
+        # Status der Revolver anzeigen
+        print_revolvers_status(self.players, self.revolvers)
 
-        # Spiel-Schleife
-        while len(self.players) > 1:
-            print(f"\n👥 Verbleibende Spieler: {', '.join(self.players)}")
+        # Spieler auswählen
+        current_player = input(f"👉 Wer soll schießen? ({', '.join(self.players)}): ").strip()
+        check_exit(current_player)
 
-            # Statusanzeige der Revolver mit ausgelagerter Funktion
-            print_revolvers_status(self.players, revolvers)
+        if current_player not in self.players:
+            print(f"❌ {current_player} ist kein gültiger Spieler. Bitte erneut versuchen.")
+            return  # Runde erneut starten
 
-            # Spieler auswählen
-            current_player = input("👉 Wer soll als nächstes schießen? (Name eingeben): ").strip()
-            check_exit(current_player)
+        print(f"\n🔫 {current_player} hebt den Revolver...")
 
-            if current_player not in self.players:
-                print(f"❌ {current_player} ist kein gültiger Spieler. Bitte erneut versuchen.")
-                continue
-
-            # Spieler schießt
-            print(f"\n🔫 {current_player} hebt den Revolver...")
+        # 4-Sekunden-Timer für Spannung
+        for i in range(4, 0, -1):
+            print(f"⏳ {i}...", end="\r", flush=True)
             time.sleep(1)
 
-            # Prüfe, ob der Spieler überlebt
-            if revolvers[current_player].shoot():
-                print(f"💥 BOOM! {current_player} hat verloren!")
-                self.players.remove(current_player)
-                del revolvers[current_player]
-            else:
-                print(f"🌟 Klick! {current_player} hat überlebt!")
+        # Spieler schießt
+        result = player_shoot_logic(current_player, self.players, self.revolvers)
 
+        if result["lost"]:
+            print(f"💥 BOOM! {current_player} hat verloren!")
             time.sleep(1)
-
-        # Spielende
-        if len(self.players) == 1:
-            print(f"\n🏆 {self.players[0]} ist der Gewinner! 🎉")
         else:
-            print("❌ Kein Gewinner. Alle Spieler sind ausgeschieden.")
+            print(f"🌟 Klick! {current_player} hat überlebt!")
+            time.sleep(1)
+
+    def is_game_over(self):
+        """Prüft, ob das Spiel vorbei ist."""
+        return len(self.players) <= 1
+
+    def get_winner(self):
+        """Gibt den Gewinner zurück, falls es einen gibt."""
+        return self.players[0] if len(self.players) == 1 else None

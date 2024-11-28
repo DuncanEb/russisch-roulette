@@ -1,53 +1,60 @@
 def check_exit(input_text):
-    """Überprüft, ob der eingegebene Text das geheime Wort 'exit' enthält."""
+    """Beendet das Programm, falls der Benutzer 'exit' eingibt."""
     if input_text.strip().lower() == "exit":
-        print("\n🎮 Spiel wurde abgebrochen. Bis zum nächsten Mal! 🙌")
+        print("\n🎮 Spiel wurde abgebrochen!")
         exit()
 
-
-# def get_players(self):
-#     # Spielerregistrierung
-#     print("👥 Spieler eingeben:")
-#     while True:
-#         player_name = input("➤ Spielername: ").strip()
-#         check_exit(player_name)
-#         if player_name == "":
-#             if len(self.players) < 2:
-#                 print("❌ Mindestens 2 Spieler erforderlich.")
-#                 continue
-#             break
-#         self.players.append(player_name)
-
-
-# def print_revolvers_status(self, revolvers):
-#     """Zeige den Status aller Revolver an."""
-#     print("\n🔫 Revolverstatus:")
-#     for player, revolver in revolvers.items():
-#         print(f"  {player}: {revolver.remaining_shots()} Schuss verbleibend")
-#     print("-" * 50)
-
-
 def get_players():
-    """Lässt den Benutzer die Spieler eingeben."""
+    """
+    Fragt die Spieler ab und gibt eine Liste der Spielernamen zurück.
+    """
     players = []
-    print("👥 Bitte die Namen der Spieler eingeben (einen Namen pro Zeile).")
-    print("🚪 Drücke Enter ohne Eingabe, um die Eingabe zu beenden.")
+    print("👥 Bitte geben Sie die Namen der Spieler ein (mindestens 2 Spieler).")
+    print("🚪 Drücken Sie Enter ohne Eingabe, um die Eingabe zu beenden.")
     while True:
         player_name = input("➤ Spielername: ").strip()
         check_exit(player_name)
-        if player_name == "":
+        if not player_name:
             if len(players) < 2:
-                print("❌ Es müssen mindestens 2 Spieler teilnehmen.")
+                print("❌ Mindestens 2 Spieler sind erforderlich!")
                 continue
             break
         players.append(player_name)
     return players
 
+def player_shoot_logic(player, players, revolvers):
+    """
+    Führt die Schussaktion eines Spielers aus.
+    :param player: Name des Spielers
+    :param players: Liste der Spieler
+    :param revolvers: Dictionary mit Revolver-Objekten pro Spieler
+    :return: Dictionary mit dem Ergebnis des Schusses
+    """
+    result = {"lost": False}
+
+    # Der Spieler schießt mit seinem Revolver
+    if revolvers[player].shoot():
+        # Spieler verliert
+        result["lost"] = True
+        remove_player(player, players, revolvers)
+
+    return result
 
 def print_revolvers_status(players, revolvers):
-    """Zeigt den Status der Revolver für alle Spieler an."""
+    """
+    Zeigt den Status der Revolver für alle Spieler an.
+    :param players: Liste der Spieler
+    :param revolvers: Dictionary der Spieler-Revolver
+    """
     print("\n🔫 Revolverstatus:")
     for player in players:
-        remaining_shots = revolvers[player].remaining_shots()
+        remaining_shots = 6 - revolvers[player].current_position
         print(f"  {player}: {remaining_shots} Schuss verbleibend")
     print("-" * 50)
+
+def remove_player(player, players, revolvers):
+    """
+    Entfernt einen Spieler und seinen Revolver aus den Datenstrukturen.
+    """
+    players.remove(player)
+    del revolvers[player]

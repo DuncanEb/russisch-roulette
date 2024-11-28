@@ -8,10 +8,27 @@
 </head>
 <body>
     <h1>Willkommen beim Russischen Roulette</h1>
+
+    <!-- Formular für Spieler hinzufügen -->
+    <form action="/add_player" method="post">
+        <label for="player">Spielername:</label>
+        <!-- Textfeld für die Eingabe des Spielernamens -->
+        <input type="text" id="player" name="player" placeholder="Spielername" required>
+        <!-- Button, der mit Enter automatisch ausgelöst wird -->
+        <button type="submit">Spieler hinzufügen</button>
+    </form>
+
+    <!-- Liste der bereits hinzugefügten Spieler -->
+    <h2>Bisherige Spieler:</h2>
+    <ul>
+        {% for player in players %}
+        <li>{{ player }}</li>
+        {% endfor %}
+    </ul>
+
+    <!-- Button, um das Spiel zu starten -->
     <form action="/start" method="post">
-        <label for="players">Spieler (einen Namen pro Zeile):</label><br>
-        <textarea name="players" id="players" rows="5" required></textarea><br>
-        <button type="submit">Spiel starten</button>
+        <button type="submit" {% if players|length < 2 %}disabled{% endif %}>Spiel starten</button>
     </form>
 </body>
 </html>

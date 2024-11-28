@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Russisches Roulette</title>
+</head>
+<body>
+    <h1>Willkommen beim Russischen Roulette!</h1>
+    <form method="post">
+        <label for="players">Spieler hinzufügen:</label><br>
+        <textarea id="players" name="players" rows="5" cols="30" placeholder="Spielername pro Zeile"></textarea><br>
+        {% if error %}
+        <p style="color: red;">{{ error }}</p>
+        {% endif %}
+        <button type="submit">Spiel starten</button>
+    </form>
+</body>
+</html>
